@@ -1,19 +1,26 @@
-DEV_COMPOSE_FILE=compose.dev.yaml
-DEBUG_COMPOSE_FILE=compose.debug.yaml
-TEST_COMPOSE_FILE=compose.test.yaml
+include .env
+export POSTGRES_USER POSTGRES_DB
 
-.PHONY: compose-build
-compose-build:
-	docker compose -f $(DEV_COMPOSE_FILE) build
+DEV_COMPOSE_FILE := compose.dev.yaml
+DEBUG_COMPOSE_FILE := compose.debug.yaml
+TEST_COMPOSE_FILE := compose.test.yaml
 
-.PHONY: compose-up-build
-compose-up-build:
-	docker compose -f $(DEV_COMPOSE_FILE) up --build
+.PHONY: compose-dev-up
+compose-dev-up:
+	@docker compose -f ${DEV_COMPOSE_FILE} up -d
 
-.PHONY: compose-up-debug-build
-compose-up-debug-build:
-	docker compose -f $(DEV_COMPOSE_FILE) -f $(DEBUG_COMPOSE_FILE) up --build
+.PHONY: compose-dev-up-build
+compose-dev-up-build:
+	@docker compose -f ${DEV_COMPOSE_FILE} up --build -d
 
-.PHONY: compose-down
-compose-down:
-	docker compose -f $(DEV_COMPOSE_FILE) down
+.PHONY: compose-dev-down
+compose-dev-down:
+	@docker compose -f ${DEV_COMPOSE_FILE} down
+
+.PHONY: compose-dev-logs
+compose-dev-logs:
+	@docker compose -f ${DEV_COMPOSE_FILE} logs -f
+
+.PHONY: psql
+psql:
+	@docker compose -f ${DEV_COMPOSE_FILE} exec -it postgres-db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
