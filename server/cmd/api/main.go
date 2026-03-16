@@ -2,16 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/mrbananaaa/bel-server/internal/config"
 )
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("error loading env: %v", err)
-	}
+	cfg := config.MustLoad()
 
 	fmt.Println("AppEnv:", cfg.AppEnv)
 	fmt.Println("Port:", cfg.Port)

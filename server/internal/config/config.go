@@ -1,8 +1,9 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/caarlos0/env/v11"
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -13,13 +14,31 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	_ = godotenv.Load()
+	loadDotEnv()
 
 	cfg := &Config{}
 
 	if err := env.Parse(cfg); err != nil {
+		return nil, fmt.Errorf("config parse error: %w", err)
+	}
+
+	if err := validate(cfg); err != nil {
 		return nil, err
 	}
 
 	return cfg, nil
+}
+
+func MustLoad() *Config {
+	cfg, err := Load()
+	if err != nil {
+		panic(err)
+	}
+
+	return cfg
+}
+
+func validate(cfg *Config) error {
+	// TODO: do validation
+	return nil
 }
