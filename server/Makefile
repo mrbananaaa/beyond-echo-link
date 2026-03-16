@@ -20,3 +20,7 @@ watch:
 
 .PHONY: server-dev
 server-dev: clean watch
+
+.PHONY: server-windows-dev
+server-windows-dev:
+	@air -c air.windows.toml
