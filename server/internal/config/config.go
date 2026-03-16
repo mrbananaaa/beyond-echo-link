@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	AppEnv    string `env:"APP_ENV" envDefault:"development"`
-	Port      int    `env:"PORT" envDefault:"9090"`
-	RedisAddr string `env:"REDIS_ADDR,required"`
-	Debug     bool   `env:"DEBUG" envDefault:"true"`
+	AppEnv string `env:"APP_ENV" envDefault:"development"`
+
+	Server ServerConfig
+	DB     DatabaseConfig
+	Log    LogConfig
 }
 
 func Load() (*Config, error) {
@@ -40,5 +41,13 @@ func MustLoad() *Config {
 
 func validate(cfg *Config) error {
 	// TODO: do validation
+	if cfg.Server.Port <= 0 {
+		return fmt.Errorf("invalid server port")
+	}
+
+	if cfg.DB.URL == "" {
+		return fmt.Errorf("database url is required")
+	}
+
 	return nil
 }

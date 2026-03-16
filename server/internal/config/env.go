@@ -17,7 +17,5 @@ func loadDotEnv() {
 		return
 	}
 
-	_ = godotenv.Load()
-
-	_ = godotenv.Load(".env.local")
+	_ = godotenv.Overload(".env", ".env.local")
 }
