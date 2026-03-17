@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/mrbananaaa/bel-server/internal/config"
+	"github.com/mrbananaaa/bel-server/internal/app"
 )
 
 func main() {
-	cfg := config.MustLoad()
+	a, err := app.New()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Println("AppEnv:", cfg.AppEnv)
-	fmt.Println("Port:", cfg.Server.Port)
-	fmt.Println("DbUrl:", cfg.DB.URL)
-	fmt.Println("LogLevel:", cfg.Log.Level)
-
-	fmt.Println("Wassup bbg")
+	if err := a.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

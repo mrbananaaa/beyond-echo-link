@@ -1,24 +1,31 @@
 package http
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+	"time"
+)
 
 type Server struct {
-	server  *http.Server
-	handler http.Handler
+	server *http.Server
 }
 
-func New(
-	addr string,
-	handler http.Handler,
-) *Server {
+func NewServer(addr string, router http.Handler) *Server {
 	return &Server{
 		server: &http.Server{
-			Addr:    addr,
-			Handler: handler,
+			Addr:         addr,
+			Handler:      router,
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			IdleTimeout:  120 * time.Second,
 		},
 	}
 }
 
-func (s *Server) Run() error {
+func (s *Server) Start() error {
 	return s.server.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
 }
