@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mrbananaaa/bel-server/internal/http/response"
 )
 
 type HealthHandler struct{}
@@ -26,6 +26,5 @@ func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
 		"status": "ok",
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response.OK(w, resp)
 }
