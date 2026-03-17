@@ -3,12 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/mrbananaaa/bel-server/internal/config"
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
@@ -40,31 +34,12 @@ func New() (*App, error) {
 	}, nil
 }
 
-func (a *App) Run() error {
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-	defer stop()
+func (a *App) Start() error {
+	return a.server.Start()
+}
 
-	go func() {
-		log.Printf("server started on :%v", a.Config.Server.Port)
+func (a *App) Shutdown(ctx context.Context) error {
+	// INFO: cleaning the app here...
 
-		if err := a.server.Start(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Error starting server: %v", err)
-		}
-	}()
-
-	<-ctx.Done()
-
-	log.Printf("shutdown signal received")
-
-	shutdownCtx, cancel := context.WithTimeout(
-		context.Background(),
-		30*time.Second,
-	)
-	defer cancel()
-
-	return a.server.Shutdown(shutdownCtx)
+	return a.server.Shutdown(ctx)
 }
