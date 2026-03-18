@@ -1,40 +1,73 @@
 package response
 
-import "net/http"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/logger"
+)
 
 type ErrorResponse struct {
-	Error struct {
-		Message string   `json:"message"`
-		Errors  []string `json:"erors"`
-	} `json:"error"`
+	Error   string   `json:"error"`
+	Message string   `json:"message"`
+	Details []string `json:"details,omitempty"`
 }
 
-func Error(
-	w http.ResponseWriter,
-	status int,
-	msg string,
-	errs []string,
-) {
-	resp := ErrorResponse{}
-	resp.Error.Message = msg
-	resp.Error.Errors = errs
+func Error(w http.ResponseWriter, r *http.Request, err error) {
+	l := logger.FromContext(r.Context())
 
-	JSON(w, status, resp)
-}
+	var appErr *apperror.Error
+	resp := &ErrorResponse{}
 
-func BadRequest(
-	w http.ResponseWriter,
-	msg string,
-	errs []string,
-) {
-	Error(
-		w,
-		http.StatusBadRequest,
-		msg,
-		errs,
+	if errors.As(err, &appErr) {
+		if appErr.Code == apperror.CodeInternal {
+			l.Error("internal error",
+				"error", err.Error(),
+				"code", appErr.Code,
+			)
+		} else {
+			l.Info("client error",
+				"error", err.Error(),
+				"code", appErr.Code,
+			)
+		}
+
+		resp.Error = appErr.Code
+		resp.Message = appErr.Message
+
+		if len(appErr.Details) > 0 {
+			resp.Details = appErr.Details
+		}
+
+		JSON(w, statusFromCode(appErr.Code), resp)
+		return
+	}
+
+	l.Error("unexpected error",
+		"error", err.Error(),
+		"type", fmt.Sprintf("%T", err),
 	)
+
+	resp.Error = "INTERNAL_ERROR"
+	resp.Message = "internal server error"
+
+	JSON(w, http.StatusInternalServerError, resp)
+
 }
 
-func InternalServerError(w http.ResponseWriter) {
-	Error(w, http.StatusInternalServerError, "internal server error", nil)
+func statusFromCode(code string) int {
+	switch code {
+	case apperror.CodeBadRequest:
+		return http.StatusBadRequest
+	case apperror.CodeNotFound:
+		return http.StatusNotFound
+	case "UNAUTHORIZED":
+		return http.StatusUnauthorized
+	case "FORBIDDEN":
+		return http.StatusForbidden
+	default:
+		return http.StatusInternalServerError
+	}
 }
