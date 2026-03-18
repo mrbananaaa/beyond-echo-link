@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mrbananaaa/bel-server/internal/http/response"
+	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
 type HealthHandler struct{}
@@ -22,6 +23,9 @@ func (h *HealthHandler) Routes() chi.Router {
 }
 
 func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
+	log := logger.FromContext(r.Context())
+	log.Info("handling request")
+
 	resp := map[string]string{
 		"status": "ok",
 	}
