@@ -4,7 +4,10 @@ go 1.26.1
 
 require (
 	github.com/caarlos0/env/v11 v11.4.0
+	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 )
 
-require github.com/go-chi/chi/v5 v5.2.5 // indirect
+require github.com/go-chi/chi/v5 v5.2.5
+
+require github.com/Marlliton/slogpretty v0.1.3 // indirect
