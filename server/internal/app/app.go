@@ -3,19 +3,27 @@ package app
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"net/http"
 
 	"github.com/mrbananaaa/bel-server/internal/config"
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
+	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
 type App struct {
 	Config *config.Config
+	Log    *slog.Logger
 	server *apphttp.Server
 }
 
 func New() (*App, error) {
 	cfg := config.MustLoad()
+	log := logger.New(logger.Config{
+		Env:     "dev",
+		Service: "infra",
+	})
 
 	healthHandler := handlers.NewHealthHandler()
 
@@ -30,12 +38,17 @@ func New() (*App, error) {
 
 	return &App{
 		Config: cfg,
+		Log:    log,
 		server: server,
 	}, nil
 }
 
 func (a *App) Start() error {
-	return a.server.Start()
+	if err := a.server.Start(); err != http.ErrServerClosed {
+		return err
+	}
+
+	return nil
 }
 
 func (a *App) Shutdown(ctx context.Context) error {

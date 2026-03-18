@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mrbananaaa/bel-server/internal/app"
+	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
 func main() {
@@ -18,8 +19,10 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("server started on :%v", a.Config.Server.Port)
+		// log.Printf("server started on :%v", a.Config.Server.Port)
+		a.Log.Info("server started", "port", a.Config.Server.Port)
 		if err := a.Start(); err != nil {
+			logger.ErrorEvent(a.Log, "starting_server_failed", "error starting server", err)
 			log.Fatal(err)
 		}
 	}()
@@ -33,7 +36,8 @@ func main() {
 
 	<-stop
 
-	log.Println("shutting down server...")
+	// log.Println("shutting down server...")
+	a.Log.Warn("shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -42,5 +46,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("server stopped")
+	// log.Println("server stopped")
+	a.Log.Info("server stopped")
 }
