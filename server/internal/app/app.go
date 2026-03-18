@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/mrbananaaa/bel-server/internal/config"
+	"github.com/mrbananaaa/bel-server/internal/db"
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
 	"github.com/mrbananaaa/bel-server/internal/logger"
@@ -24,6 +25,18 @@ func New() (*App, error) {
 		Env:     "dev",
 		Service: "infra",
 	})
+
+	dbpool, err := db.NewPool(cfg.DB.URL)
+	if err != nil {
+		return nil, err
+	}
+	defer dbpool.Close()
+
+	if err := dbpool.Ping(context.Background()); err != nil {
+		log.Error("cannot connect to db", "error", err.Error())
+	}
+
+	log.Info("connected to database")
 
 	healthHandler := handlers.NewHealthHandler()
 
