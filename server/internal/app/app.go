@@ -45,12 +45,14 @@ func New() (*App, error) {
 
 	userRepo := user.NewUserRepository(dbpool)
 
-	_ = auth.NewAuthService(txManager, userRepo)
+	authService := auth.NewAuthService(txManager, userRepo)
 
 	healthHandler := handlers.NewHealthHandler()
+	authHandler := handlers.NewAuthHandler(authService)
 
 	router := apphttp.NewRouter(apphttp.Handlers{
 		Health: healthHandler,
+		Auth:   authHandler,
 	})
 
 	server := apphttp.NewServer(

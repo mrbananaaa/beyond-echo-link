@@ -10,6 +10,7 @@ import (
 
 type Handlers struct {
 	Health *handlers.HealthHandler
+	Auth   *handlers.AuthHandler
 }
 
 func NewRouter(h Handlers) *chi.Mux {
@@ -24,6 +25,8 @@ func NewRouter(h Handlers) *chi.Mux {
 	r.Use(middlewares.MockAuth())
 	r.Use(logger.Middleware(log))
 	r.Use(middleware.Recoverer)
+
+	r.Mount("/auth", h.Auth.Routes())
 
 	r.Mount("/health", h.Health.Routes())
 
