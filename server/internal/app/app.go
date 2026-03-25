@@ -6,11 +6,13 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/mrbananaaa/bel-server/internal/auth"
 	"github.com/mrbananaaa/bel-server/internal/config"
 	"github.com/mrbananaaa/bel-server/internal/db"
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
 	"github.com/mrbananaaa/bel-server/internal/logger"
+	"github.com/mrbananaaa/bel-server/internal/user"
 )
 
 type App struct {
@@ -34,9 +36,16 @@ func New() (*App, error) {
 
 	if err := dbpool.Ping(context.Background()); err != nil {
 		log.Error("cannot connect to db", "error", err.Error())
+		return nil, err
 	}
 
 	log.Info("connected to database")
+
+	txManager := db.NewTxManager(dbpool)
+
+	userRepo := user.NewUserRepository(dbpool)
+
+	_ = auth.NewAuthService(txManager, userRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 
