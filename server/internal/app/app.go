@@ -11,6 +11,7 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/db"
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
+	authHandler "github.com/mrbananaaa/bel-server/internal/http/handlers/auth"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/user"
 )
@@ -48,7 +49,7 @@ func New() (*App, error) {
 	authService := auth.NewAuthService(txManager, userRepo)
 
 	healthHandler := handlers.NewHealthHandler()
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := authHandler.NewAuthHandler(authService)
 
 	router := apphttp.NewRouter(apphttp.Handlers{
 		Health: healthHandler,
