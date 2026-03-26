@@ -4,13 +4,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
+	auth "github.com/mrbananaaa/bel-server/internal/http/handlers/auth"
 	"github.com/mrbananaaa/bel-server/internal/http/middlewares"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
 type Handlers struct {
 	Health *handlers.HealthHandler
-	Auth   *handlers.AuthHandler
+	Auth   *auth.AuthHandler
 }
 
 func NewRouter(h Handlers) *chi.Mux {
