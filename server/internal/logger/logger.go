@@ -53,3 +53,12 @@ func ErrorEvent(l *slog.Logger, event string, msg string, err error, args ...any
 
 	l.Error(msg, allArgs...)
 }
+
+func ErrorParseJSON(l *slog.Logger, err error) {
+	ErrorEvent(l,
+		"json_parsing_failed",
+		"failed to decode request body",
+		err,
+		"error_type", "infrastructure_error",
+	)
+}
