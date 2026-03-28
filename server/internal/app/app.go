@@ -14,6 +14,7 @@ import (
 	authHandler "github.com/mrbananaaa/bel-server/internal/http/handlers/auth"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/user"
+	"github.com/mrbananaaa/bel-server/internal/validation"
 )
 
 type App struct {
@@ -48,8 +49,9 @@ func New() (*App, error) {
 
 	authService := auth.NewAuthService(txManager, userRepo)
 
+	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
-	authHandler := authHandler.NewAuthHandler(authService)
+	authHandler := authHandler.NewAuthHandler(validator, authService)
 
 	router := apphttp.NewRouter(apphttp.Handlers{
 		Health: healthHandler,
