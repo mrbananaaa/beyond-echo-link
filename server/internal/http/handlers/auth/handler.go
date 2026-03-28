@@ -44,7 +44,19 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: register
+	user, err := h.authService.RegisterUser(r.Context(), auth.RegisterUserInput(req))
+	if err != nil {
+		logger.ErrorEvent(l,
+			"user_register_failed",
+			"failed to register user",
+			err,
+			"error_type", "business_error",
+		)
+		response.Error(w, r, apperror.ErrInternal)
+		return
+	}
+
 	// TODO: token
 	// TODO: response
-	response.JSON(w, http.StatusOK, map[string]any{"message": "sign up route"})
+	response.JSON(w, http.StatusCreated, map[string]any{"user": user})
 }
