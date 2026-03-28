@@ -31,3 +31,7 @@ func New(code, message string, details ...string) *AppEror {
 		Details: details,
 	}
 }
+
+func ValidationError(field ...string) *AppEror {
+	return New(CodeBadRequest, "validation error", field...)
+}
