@@ -62,3 +62,12 @@ func ErrorParseJSON(l *slog.Logger, err error) {
 		"error_type", "infrastructure_error",
 	)
 }
+
+func ErrorValidation(l *slog.Logger, err error) {
+	ErrorEvent(l,
+		"req_validation_error",
+		"failed to validate request body",
+		err,
+		"error_type", "http_error",
+	)
+}
