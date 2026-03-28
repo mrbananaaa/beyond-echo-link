@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mrbananaaa/bel-server/internal/auth"
 	"github.com/mrbananaaa/bel-server/internal/config"
 	"github.com/mrbananaaa/bel-server/internal/db"
@@ -21,6 +22,7 @@ type App struct {
 	Config *config.Config
 	Log    *slog.Logger
 	server *apphttp.Server
+	dbpool *pgxpool.Pool
 }
 
 func New() (*App, error) {
@@ -34,7 +36,6 @@ func New() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer dbpool.Close()
 
 	if err := dbpool.Ping(context.Background()); err != nil {
 		log.Error("cannot connect to db", "error", err.Error())
@@ -67,6 +68,7 @@ func New() (*App, error) {
 		Config: cfg,
 		Log:    log,
 		server: server,
+		dbpool: dbpool,
 	}, nil
 }
 
@@ -80,6 +82,7 @@ func (a *App) Start() error {
 
 func (a *App) Shutdown(ctx context.Context) error {
 	// INFO: cleaning the app here...
+	a.dbpool.Close()
 
 	return a.server.Shutdown(ctx)
 }
