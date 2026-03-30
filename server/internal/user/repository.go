@@ -28,15 +28,33 @@ func (r *UserRepository) getQueries(ctx context.Context) *queries.Queries {
 
 func (r *UserRepository) CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error) {
 	q := r.getQueries(ctx)
-	return q.CreateUser(ctx, params)
+
+	u, err := q.CreateUser(ctx, params)
+	if err != nil {
+		return queries.User{}, db.MapError(err)
+	}
+
+	return u, nil
 }
 
 func (r *UserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (queries.User, error) {
 	q := r.getQueries(ctx)
-	return q.GetUserByID(ctx, userID)
+
+	u, err := q.GetUserByID(ctx, userID)
+	if err != nil {
+		return queries.User{}, db.MapError(err)
+	}
+
+	return u, nil
 }
 
 func (r *UserRepository) GetUserByLookupID(ctx context.Context, lookupID string) (queries.User, error) {
 	q := r.getQueries(ctx)
-	return q.GetUserByLookupID(ctx, lookupID)
+
+	u, err := q.GetUserByLookupID(ctx, lookupID)
+	if err != nil {
+		return queries.User{}, db.MapError(err)
+	}
+
+	return u, nil
 }
