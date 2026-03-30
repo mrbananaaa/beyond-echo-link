@@ -3,30 +3,42 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mrbananaaa/bel-server/internal/apperror"
 	"github.com/mrbananaaa/bel-server/internal/db"
 	queries "github.com/mrbananaaa/bel-server/internal/db/sqlc"
+	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/user"
 )
 
 type AuthService struct {
 	txManager *db.TxManager
 	userRepo  *user.UserRepository
+	log       *slog.Logger
 }
 
 func NewAuthService(
 	txManager *db.TxManager,
 	userRepo *user.UserRepository,
+	log *slog.Logger,
 ) *AuthService {
 	return &AuthService{
 		txManager: txManager,
 		userRepo:  userRepo,
+		log:       log.With("domain", "auth"),
 	}
 }
 
 func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput) (*RegisterUserOutput, error) {
+	l := logger.FromContext(ctx).With("domain", "auth")
+	if l == nil {
+		l = s.log
+	}
+
 	passwordHash, err := HashPassword(input.Password)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't hash password: %w", err)
@@ -51,9 +63,30 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		// TODO: Mapping repo error
+
+		err = apperror.New(
+			apperror.TypeBusiness,
+			apperror.CodeInternal,
+			"internal server error",
+			http.StatusInternalServerError,
+			err,
+		)
+
+		logger.ErrorEvent(l,
+			"user_creation_failed",
+			"failed to create user",
+			err,
+		)
+
+		return nil, err
 	}
 
+	logger.InfoEvent(l,
+		"user_created",
+		"user created successfully",
+		"user_id", user.ID,
+	)
 	return &RegisterUserOutput{
 		ID:             user.ID,
 		Email:          user.Email,
