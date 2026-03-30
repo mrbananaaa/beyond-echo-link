@@ -58,3 +58,14 @@ func (r *UserRepository) GetUserByLookupID(ctx context.Context, lookupID string)
 
 	return u, nil
 }
+
+func (r *UserRepository) GetUserByUsername(ctx context.Context, username string) (queries.User, error) {
+	q := r.getQueries(ctx)
+
+	u, err := q.GetUserByUsername(ctx, username)
+	if err != nil {
+		return queries.User{}, db.MapError(err)
+	}
+
+	return u, nil
+}
