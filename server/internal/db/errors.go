@@ -29,7 +29,7 @@ func MapError(err error) error {
 
 func mapUniqueViolation(pgErr *pgconn.PgError) error {
 	switch pgErr.ConstraintName {
-	case "user_email_key":
+	case "users_email_key":
 		return apperror.Conflict("email already exists", "email", pgErr)
 	case "users_username_key":
 		return apperror.Conflict("username already exists", "username", pgErr)
