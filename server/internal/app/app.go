@@ -29,7 +29,7 @@ func New() (*App, error) {
 	cfg := config.MustLoad()
 	log := logger.New(logger.Config{
 		Env:     "dev",
-		Service: "infra",
+		Service: "api",
 	})
 
 	dbpool, err := db.NewPool(cfg.DB.URL)
@@ -48,7 +48,7 @@ func New() (*App, error) {
 
 	userRepo := user.NewUserRepository(dbpool)
 
-	authService := auth.NewAuthService(txManager, userRepo)
+	authService := auth.NewAuthService(txManager, userRepo, log)
 
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
@@ -57,7 +57,7 @@ func New() (*App, error) {
 	router := apphttp.NewRouter(apphttp.Handlers{
 		Health: healthHandler,
 		Auth:   authHandler,
-	})
+	}, log)
 
 	server := apphttp.NewServer(
 		fmt.Sprintf(":%v", cfg.Server.Port),

@@ -1,6 +1,8 @@
 package http
 
 import (
+	"log/slog"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
@@ -14,17 +16,12 @@ type Handlers struct {
 	Auth   *auth.AuthHandler
 }
 
-func NewRouter(h Handlers) *chi.Mux {
-	log := logger.New(logger.Config{
-		Env:     "dev",
-		Service: "api",
-	})
-
+func NewRouter(h Handlers, l *slog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
 	r.Use(middlewares.MockAuth())
-	r.Use(logger.Middleware(log))
+	r.Use(logger.Middleware(l))
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/auth", h.Auth.Routes())
