@@ -19,15 +19,14 @@ var (
 	ErrUnauthorized = New(TypeInfrastructure, CodeUnauthorized, "unauthorized", http.StatusUnauthorized, nil)
 )
 
-// AppEror ...
-// TODO: rework on this and mapper
+// AppEror internal error structure
 type AppEror struct {
-	Type    Type
-	Code    string
-	Status  int
-	Message string
-	Details []string
-	Err     error
+	Type    Type     // typeof error for logging purpose
+	Code    string   // code message for client
+	Status  int      // http status code
+	Message string   // error message for client
+	Details []string // fields or other detail messages for client
+	Err     error    // original error
 }
 
 func (e *AppEror) Error() string {
