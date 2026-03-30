@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/mrbananaaa/bel-server/internal/apperror"
-	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
 type ErrResponse struct {
@@ -15,23 +14,10 @@ type ErrResponse struct {
 }
 
 func Error(w http.ResponseWriter, r *http.Request, err error) {
-	l := logger.FromContext(r.Context())
-
 	var appErr *apperror.AppEror
 	resp := ErrResponse{}
 
 	if errors.As(err, &appErr) {
-		if appErr.Code == apperror.CodeInternal {
-			l.Error("internal error",
-				"err", err,
-				"code", appErr.Code,
-			)
-		} else {
-			l.Info("client error",
-				"err", err,
-				"code", appErr.Code,
-			)
-		}
 
 		resp.Error = appErr.Code
 		resp.Message = appErr.Message
@@ -43,11 +29,6 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 		JSON(w, statusFromCode(appErr.Code), resp)
 		return
 	}
-
-	// fallback
-	l.Error("unexpected error",
-		"err", err,
-	)
 
 	resp.Error = apperror.CodeInternal
 	resp.Message = "internal server error"
