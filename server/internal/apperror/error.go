@@ -10,6 +10,7 @@ const (
 	CodeBadRequest   = "BAD_REQUEST"
 	CodeNotFound     = "NOT_FOUND"
 	CodeUnauthorized = "UNAUTHORIZED"
+	CodeConflict     = "CONFLICT"
 )
 
 var (
@@ -70,7 +71,7 @@ func ValidationError(field ...string) *AppEror {
 func Conflict(msg, field string, err error) *AppEror {
 	return New(
 		TypeDB,
-		CodeBadRequest,
+		CodeConflict,
 		msg,
 		http.StatusConflict,
 		err,
