@@ -6,6 +6,7 @@ func (h *AuthHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/signup", h.SignUp)
+	r.Post("/signin", h.SignIn)
 
 	return r
 }

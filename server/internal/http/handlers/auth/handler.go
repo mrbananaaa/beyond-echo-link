@@ -26,10 +26,11 @@ func NewAuthHandler(
 	}
 }
 
+// SignUp /auth/signup
 func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	l := logger.FromContext(r.Context())
 
-	var req registerRequest
+	var req signupRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.ErrorParseJSON(l, err)
@@ -49,7 +50,57 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: token
-	// TODO: response
-	response.JSON(w, http.StatusCreated, map[string]any{"user": user})
+	// TODO: refresh token
+
+	accessToken, err := h.authService.GenerateAccessToken(user.ID)
+	if err != nil {
+		response.Error(w, r, err)
+		return
+	}
+
+	response.JSON(w, http.StatusCreated, map[string]any{
+		"user":         user,
+		"access_token": accessToken,
+	})
+}
+
+// Signin /auth/signin
+func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
+	l := logger.FromContext(r.Context())
+
+	var req signinRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		logger.ErrorParseJSON(l, err)
+		response.Error(w, r, apperror.ErrBadRequest)
+		return
+	}
+
+	if err := h.validator.Validate(req); err != nil {
+		logger.ErrorValidation(l, err)
+		response.Error(w, r, err)
+		return
+	}
+
+	user, err := h.authService.Login(r.Context(), auth.LoginInput(req))
+	if err != nil {
+		response.Error(w, r, err)
+		return
+	}
+
+	accessToken, err := h.authService.GenerateAccessToken(user.ID)
+	if err != nil {
+		response.Error(w, r, err)
+		return
+	}
+
+	response.JSON(w, http.StatusOK, map[string]any{
+		"user_id":      user.ID,
+		"access_token": accessToken,
+	})
+}
+
+// RefreshToken /auth/refresh
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+
 }
