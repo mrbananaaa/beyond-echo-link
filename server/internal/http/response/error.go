@@ -26,7 +26,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 			resp.Details = appErr.Details
 		}
 
-		JSON(w, statusFromCode(appErr.Code), resp)
+		JSON(w, appErr.Status, resp)
 		return
 	}
 
@@ -34,19 +34,4 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 	resp.Message = "internal server error"
 
 	JSON(w, http.StatusInternalServerError, resp)
-}
-
-func statusFromCode(code string) int {
-	switch code {
-	case apperror.CodeInternal:
-		return http.StatusInternalServerError
-	case apperror.CodeBadRequest:
-		return http.StatusBadRequest
-	case apperror.CodeNotFound:
-		return http.StatusBadRequest
-	case apperror.CodeUnauthorized:
-		return http.StatusUnauthorized
-	default:
-		return http.StatusInternalServerError
-	}
 }
