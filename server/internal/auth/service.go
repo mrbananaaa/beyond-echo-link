@@ -2,11 +2,15 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mrbananaaa/bel-server/internal/apperror"
 	"github.com/mrbananaaa/bel-server/internal/db"
 	queries "github.com/mrbananaaa/bel-server/internal/db/sqlc"
 	"github.com/mrbananaaa/bel-server/internal/logger"
@@ -32,10 +36,7 @@ func NewAuthService(
 }
 
 func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput) (*RegisterUserOutput, error) {
-	l := logger.FromContext(ctx).With("domain", "auth")
-	if l == nil {
-		l = s.log
-	}
+	l := s.getLogger(ctx)
 
 	passwordHash, err := HashPassword(input.Password)
 	if err != nil {
@@ -85,4 +86,95 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
 	}, nil
+}
+
+// TODO: Login service
+func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput, error) {
+	l := s.getLogger(ctx)
+
+	user, err := s.userRepo.GetUserByUsername(ctx, input.Username)
+	if err != nil {
+		logger.ErrorEvent(l,
+			"user_login_failed",
+			"failed to get user",
+			err,
+		)
+		return nil, apperror.InvalidCredentials("invalid username or password", err)
+	}
+
+	if !CompareHash(input.Password, user.Password) {
+		logger.ErrorEvent(l,
+			"user_login_failed",
+			"failed to compare hash password",
+			nil,
+		)
+		return nil, apperror.InvalidCredentials("invalid username or password", err)
+	}
+
+	logger.InfoEvent(l,
+		"user_loggedin",
+		"user login successfully",
+		"user_id", user.ID,
+	)
+	return &LoginOutput{
+		ID: user.ID,
+	}, nil
+}
+
+type Claims struct {
+	UserID string `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
+// TODO: refactor this later using env variable
+var (
+	secretKey = []byte("thisisthejwtsupersecret")
+	iss       = "bel-backend-dev"
+	ttl       = 15 * time.Minute
+)
+
+func (s *AuthService) GenerateAccessToken(userID uuid.UUID) (string, error) {
+	now := time.Now()
+	uid := userID.String()
+
+	claims := Claims{
+		UserID: uid,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    iss,
+			Subject:   uid,
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString(secretKey)
+}
+
+func (s *AuthService) ValidateToken(tokenStr string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, apperror.InvalidCredentials("invalid token", errors.New("failed to parse token"))
+		}
+		return secretKey, nil
+	})
+	if err != nil {
+		return "", apperror.InvalidCredentials("invalid token", fmt.Errorf("failed to parse token: %w", err))
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok || !token.Valid {
+		return "", apperror.InvalidCredentials("invalid token", err)
+	}
+
+	return claims.UserID, nil
+}
+
+func (s *AuthService) getLogger(ctx context.Context) *slog.Logger {
+	l := logger.FromContext(ctx).With("domain", "auth")
+	if l == nil {
+		l = s.log
+	}
+	return l
 }
