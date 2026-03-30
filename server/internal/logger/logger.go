@@ -2,9 +2,11 @@ package logger
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/Marlliton/slogpretty"
+	"github.com/mrbananaaa/bel-server/internal/apperror"
 )
 
 type Config struct {
@@ -44,9 +46,12 @@ func InfoEvent(l *slog.Logger, event string, msg string, args ...any) {
 }
 
 func ErrorEvent(l *slog.Logger, event string, msg string, err error, args ...any) {
+	errorType := apperror.Typeof(err)
+
 	allArgs := []any{
 		"event", event,
 		"error", err.Error(),
+		"error_type", string(errorType),
 	}
 
 	allArgs = append(allArgs, args...)
@@ -59,7 +64,6 @@ func ErrorParseJSON(l *slog.Logger, err error) {
 		"json_parsing_failed",
 		"failed to decode request body",
 		err,
-		"error_type", "infrastructure_error",
 	)
 }
 
@@ -67,7 +71,12 @@ func ErrorValidation(l *slog.Logger, err error) {
 	ErrorEvent(l,
 		"req_validation_error",
 		"failed to validate request body",
-		err,
-		"error_type", "http_error",
+		apperror.New(
+			apperror.TypeInfrastructure,
+			apperror.CodeBadRequest,
+			"validation error",
+			http.StatusBadRequest,
+			nil,
+		),
 	)
 }
