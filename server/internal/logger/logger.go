@@ -39,6 +39,7 @@ func New(cfg Config) *slog.Logger {
 	)
 }
 
+// TODO: ADD LOG TYPE FOR FILTERING
 func InfoEvent(l *slog.Logger, event string, msg string, args ...any) {
 	l.Info(msg,
 		append([]any{"event", event}, args...)...,
