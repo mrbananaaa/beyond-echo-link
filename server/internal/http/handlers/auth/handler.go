@@ -37,21 +37,15 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if field, err := h.validator.Validate(req); err != nil {
+	if err := h.validator.Validate(req); err != nil {
 		logger.ErrorValidation(l, err)
-		response.Error(w, r, apperror.ValidationError(field...))
+		response.Error(w, r, err)
 		return
 	}
 
 	// TODO: register
 	user, err := h.authService.RegisterUser(r.Context(), auth.RegisterUserInput(req))
 	if err != nil {
-		logger.ErrorEvent(l,
-			"user_register_failed",
-			"failed to register user",
-			err,
-			"error_type", "business_error",
-		)
 		response.Error(w, r, apperror.ErrInternal)
 		return
 	}
