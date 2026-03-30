@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -58,6 +59,23 @@ func ErrorEvent(l *slog.Logger, event string, msg string, err error, args ...any
 	allArgs = append(allArgs, args...)
 
 	l.Error(msg, allArgs...)
+}
+
+func DebugError(l *slog.Logger, msg string, err error) {
+	if appErr, ok := errors.AsType[*apperror.AppEror](err); ok {
+		l.Debug(
+			msg,
+			"type", appErr.Type,
+			"code", appErr.Code,
+			"status", appErr.Status,
+			"message", appErr.Message,
+			"details", appErr.Details,
+			"err", appErr.Err.Error(),
+		)
+		return
+	}
+
+	l.Debug(msg, "error", err)
 }
 
 func ErrorParseJSON(l *slog.Logger, err error) {
