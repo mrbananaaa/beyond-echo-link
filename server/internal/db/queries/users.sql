@@ -20,3 +20,11 @@ FROM
   users
 WHERE
   lookup_id = @lookup_id;
+
+-- name: GetUserByUsername :one
+SELECT
+  id, email, username, password, lookup_id, bio, profile_picture, created_at, updated_at
+FROM
+  users
+WHERE
+  username = @username;

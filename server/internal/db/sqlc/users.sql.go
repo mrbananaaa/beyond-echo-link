@@ -106,3 +106,29 @@ func (q *Queries) GetUserByLookupID(ctx context.Context, lookupID string) (User,
 	)
 	return i, err
 }
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT
+  id, email, username, password, lookup_id, bio, profile_picture, created_at, updated_at
+FROM
+  users
+WHERE
+  username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.LookupID,
+		&i.Bio,
+		&i.ProfilePicture,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
