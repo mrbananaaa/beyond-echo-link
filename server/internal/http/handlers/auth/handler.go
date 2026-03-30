@@ -43,10 +43,9 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: register
 	user, err := h.authService.RegisterUser(r.Context(), auth.RegisterUserInput(req))
 	if err != nil {
-		response.Error(w, r, apperror.ErrInternal)
+		response.Error(w, r, err)
 		return
 	}
 

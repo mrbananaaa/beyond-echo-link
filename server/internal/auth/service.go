@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mrbananaaa/bel-server/internal/apperror"
 	"github.com/mrbananaaa/bel-server/internal/db"
 	queries "github.com/mrbananaaa/bel-server/internal/db/sqlc"
 	"github.com/mrbananaaa/bel-server/internal/logger"
@@ -63,16 +61,6 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 		},
 	})
 	if err != nil {
-		// TODO: Mapping repo error
-
-		err = apperror.New(
-			apperror.TypeBusiness,
-			apperror.CodeInternal,
-			"internal server error",
-			http.StatusInternalServerError,
-			err,
-		)
-
 		logger.ErrorEvent(l,
 			"user_creation_failed",
 			"failed to create user",
