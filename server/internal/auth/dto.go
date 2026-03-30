@@ -24,3 +24,12 @@ type RegisterUserOutput struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
+
+type LoginInput struct {
+	Username string
+	Password string
+}
+
+type LoginOutput struct {
+	ID uuid.UUID
+}
