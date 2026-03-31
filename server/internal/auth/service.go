@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -99,16 +100,16 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput
 			"failed to get user",
 			err,
 		)
-		return nil, apperror.InvalidCredentials("invalid username or password", err)
+		return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid username or password", err)
 	}
 
 	if !CompareHash(input.Password, user.Password) {
 		logger.ErrorEvent(l,
 			"user_login_failed",
 			"failed to compare hash password",
-			nil,
+			apperror.New(apperror.TypeBusiness, apperror.CodeUnauthorized, "failed to compare hash password", http.StatusUnauthorized, errors.New("failed to compare hash password")),
 		)
-		return nil, apperror.InvalidCredentials("invalid username or password", err)
+		return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid username or password", err)
 	}
 
 	logger.InfoEvent(l,
@@ -155,17 +156,17 @@ func (s *AuthService) GenerateAccessToken(userID uuid.UUID) (string, error) {
 func (s *AuthService) ValidateToken(tokenStr string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, apperror.InvalidCredentials("invalid token", errors.New("failed to parse token"))
+			return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", errors.New("failed to parse token"))
 		}
 		return secretKey, nil
 	})
 	if err != nil {
-		return "", apperror.InvalidCredentials("invalid token", fmt.Errorf("failed to parse token: %w", err))
+		return "", apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", fmt.Errorf("failed to parse token: %w", err))
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return "", apperror.InvalidCredentials("invalid token", err)
+		return "", apperror.InvalidCredentials(apperror.TypeBusiness, "invalid/expired token", err)
 	}
 
 	return claims.UserID, nil
