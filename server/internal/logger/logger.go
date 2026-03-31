@@ -48,6 +48,16 @@ func InfoEvent(l *slog.Logger, event string, msg string, args ...any) {
 }
 
 func ErrorEvent(l *slog.Logger, event string, msg string, err error, args ...any) {
+	if err == nil {
+		l.Error(
+			msg,
+			"event", event,
+			"error", errors.New("unknown error/nil").Error(),
+			"error_type", "Unknown Error/nil",
+		)
+		return
+	}
+
 	errorType := apperror.Typeof(err)
 
 	allArgs := []any{
