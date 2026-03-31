@@ -13,6 +13,7 @@ import (
 	apphttp "github.com/mrbananaaa/bel-server/internal/http"
 	"github.com/mrbananaaa/bel-server/internal/http/handlers"
 	authHandler "github.com/mrbananaaa/bel-server/internal/http/handlers/auth"
+	"github.com/mrbananaaa/bel-server/internal/http/middlewares"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/user"
 	"github.com/mrbananaaa/bel-server/internal/validation"
@@ -54,10 +55,18 @@ func New() (*App, error) {
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := authHandler.NewAuthHandler(validator, authService)
 
-	router := apphttp.NewRouter(apphttp.Handlers{
-		Health: healthHandler,
-		Auth:   authHandler,
-	}, log)
+	authMiddleware := middlewares.NewAuthMiddleware(authService, log)
+
+	router := apphttp.NewRouter(
+		apphttp.Handlers{
+			Health: healthHandler,
+			Auth:   authHandler,
+		},
+		apphttp.Middlewares{
+			Auth: authMiddleware,
+		},
+		log,
+	)
 
 	server := apphttp.NewServer(
 		fmt.Sprintf(":%v", cfg.Server.Port),
