@@ -10,6 +10,7 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
+// TODO: refactor to return apperror
 func CompareHash(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
