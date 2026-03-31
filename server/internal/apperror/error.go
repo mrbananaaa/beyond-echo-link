@@ -99,13 +99,3 @@ func Internal(err error) *AppEror {
 		err,
 	)
 }
-
-func InvalidCredentials(msg string, err error) *AppEror {
-	return New(
-		TypeBusiness,
-		CodeUnauthorized,
-		msg,
-		http.StatusUnauthorized,
-		err,
-	)
-}
