@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -66,9 +65,17 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := logger.WithUserID(r.Context(), userID)
-		ctx = context.WithValue(ctx, httpx.UserIDKey{}, userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		if err := httpx.SetUserIDContext(r.Context(), userID); err != nil {
+			// FIX: change to app error
+			logger.ErrorEvent(m.log,
+				"token_validation_failed",
+				"couldn't set userID context value",
+				err,
+			)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
 
