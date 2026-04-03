@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/mrbananaaa/bel-server/internal/http/httpx"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 

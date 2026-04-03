@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/mrbananaaa/bel-server/internal/http/response"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 )
 
 type HealthHandler struct{}

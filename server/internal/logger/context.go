@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/mrbananaaa/bel-server/internal/http/httpx"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 )
 
 type ctxKey struct{}

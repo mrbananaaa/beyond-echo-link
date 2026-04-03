@@ -12,10 +12,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mrbananaaa/bel-server/internal/apperror"
-	"github.com/mrbananaaa/bel-server/internal/db"
-	queries "github.com/mrbananaaa/bel-server/internal/db/sqlc"
+	"github.com/mrbananaaa/bel-server/internal/infra/db"
+	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/user"
+	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 )
 
 type AuthService struct {
@@ -41,6 +41,7 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 
 	passwordHash, err := HashPassword(input.Password)
 	if err != nil {
+		// TODO: use apperror
 		return nil, fmt.Errorf("couldn't hash password: %w", err)
 	}
 

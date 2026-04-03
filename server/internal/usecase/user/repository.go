@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mrbananaaa/bel-server/internal/db"
-	queries "github.com/mrbananaaa/bel-server/internal/db/sqlc"
+	"github.com/mrbananaaa/bel-server/internal/infra/db"
+	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"
 )
 
 type UserRepository struct {

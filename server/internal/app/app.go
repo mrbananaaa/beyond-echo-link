@@ -7,15 +7,15 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mrbananaaa/bel-server/internal/auth"
-	"github.com/mrbananaaa/bel-server/internal/config"
-	"github.com/mrbananaaa/bel-server/internal/db"
-	apphttp "github.com/mrbananaaa/bel-server/internal/http"
-	"github.com/mrbananaaa/bel-server/internal/http/handlers"
-	authHandler "github.com/mrbananaaa/bel-server/internal/http/handlers/auth"
-	"github.com/mrbananaaa/bel-server/internal/http/middlewares"
+	"github.com/mrbananaaa/bel-server/internal/infra/config"
+	"github.com/mrbananaaa/bel-server/internal/infra/db"
+	apphttp "github.com/mrbananaaa/bel-server/internal/infra/http"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/handlers"
+	authHandler "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/auth"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/user"
+	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
+	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 )
 

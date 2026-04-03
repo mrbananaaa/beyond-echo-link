@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/mrbananaaa/bel-server/internal/apperror"
-	"github.com/mrbananaaa/bel-server/internal/auth"
-	"github.com/mrbananaaa/bel-server/internal/http/response"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 	"github.com/mrbananaaa/bel-server/internal/logger"
+	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 )
 
