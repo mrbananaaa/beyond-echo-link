@@ -19,13 +19,9 @@ func JSON(
 }
 
 func OK(w http.ResponseWriter, data any) {
-	JSON(w, http.StatusOK, map[string]any{
-		"data": data,
-	})
+	JSON(w, http.StatusOK, data)
 }
 
 func Created(w http.ResponseWriter, data any) {
-	JSON(w, http.StatusCreated, map[string]any{
-		"data": data,
-	})
+	JSON(w, http.StatusCreated, data)
 }
