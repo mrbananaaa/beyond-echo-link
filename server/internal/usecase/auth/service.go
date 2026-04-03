@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -50,13 +49,12 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 
 	passwordHash, err := HashPassword(input.Password)
 	if err != nil {
-		// TODO: use apperror
-		return nil, fmt.Errorf("couldn't hash password: %w", err)
+		return nil, apperror.Internal(apperror.TypeBusiness, fmt.Errorf("failed to hash password: %w", err))
 	}
 
 	lookupID, err := generateLookupID()
 	if err != nil {
-		return nil, fmt.Errorf("couldn't generate lookupID: %w", err)
+		return nil, apperror.Internal(apperror.TypeBusiness, fmt.Errorf("couldn't generate lookupID: %w", err))
 	}
 
 	user, err := s.userRepo.CreateUser(ctx, queries.CreateUserParams{
@@ -113,12 +111,18 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput
 	}
 
 	if !CompareHash(input.Password, user.Password) {
+		// INFO: apperrr to return
+		err := apperror.InvalidCredentials(
+			apperror.TypeBusiness,
+			"invalid username or password",
+			err,
+		)
 		logger.ErrorEvent(l,
 			"user_login_failed",
 			"failed to compare hash password",
-			apperror.New(apperror.TypeBusiness, apperror.CodeUnauthorized, "failed to compare hash password", http.StatusUnauthorized, errors.New("failed to compare hash password")),
+			err,
 		)
-		return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid username or password", err)
+		return nil, err
 	}
 
 	logger.InfoEvent(l,
