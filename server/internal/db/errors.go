@@ -1,0 +1,41 @@
+package db
+
+import (
+	"errors"
+
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/mrbananaaa/bel-server/internal/apperror"
+)
+
+func MapError(err error) error {
+	var pgErr *pgconn.PgError
+
+	if errors.As(err, &pgErr) {
+		switch pgErr.Code {
+		case "23505": // unique_violation
+			return mapUniqueViolation(pgErr)
+		case "23503": // foreign_key_violation
+			return apperror.Invalid("invalid reference", "", err)
+		case "23502": // not_null_violation
+			return apperror.Invalid("missing required field", pgErr.ColumnName, err)
+
+		default:
+			return apperror.Internal(err)
+		}
+	}
+
+	return err
+}
+
+func mapUniqueViolation(pgErr *pgconn.PgError) error {
+	switch pgErr.ConstraintName {
+	case "users_email_key":
+		return apperror.Conflict("email already exists", "email", pgErr)
+	case "users_username_key":
+		return apperror.Conflict("username already exists", "username", pgErr)
+	case "users_lookup_id_key":
+		return apperror.Conflict("lookup_id already exists", "username", pgErr)
+	default:
+		return apperror.Conflict("resource already exists", "", pgErr)
+	}
+}
