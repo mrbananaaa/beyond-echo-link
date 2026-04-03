@@ -51,11 +51,13 @@ func New() (*App, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr: cfg.Redis.Address,
 	})
+
 	rdb := redisinfra.New(
 		client,
 		"dev",
 		2*time.Second,
 	)
+
 	if err := rdb.Ping(context.Background()); err != nil {
 		logger.ErrorEvent(log,
 			"rdb_ping_failed",
