@@ -55,6 +55,7 @@ func New() (*App, error) {
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := authHandler.NewAuthHandler(validator, authService)
 
+	logMiddleware := middlewares.NewLogMiddleware(log)
 	authMiddleware := middlewares.NewAuthMiddleware(authService, log)
 
 	router := apphttp.NewRouter(
@@ -63,9 +64,9 @@ func New() (*App, error) {
 			Auth:   authHandler,
 		},
 		apphttp.Middlewares{
+			Log:  logMiddleware,
 			Auth: authMiddleware,
 		},
-		log,
 	)
 
 	server := apphttp.NewServer(
