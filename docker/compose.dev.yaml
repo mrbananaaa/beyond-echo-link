@@ -10,28 +10,41 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
-  pubsub-redis:
-    image: redis:8.4-alpine
+  # pubsub-redis:
+  #   image: redis:8.4-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   command:
+  #     - redis-server
+  #     - --maxmemory 128mb
+  #     - --maxmemory-policy allkeys-lru
+  #     - --save ""
+  #     - --appendonly no
+  #     - --maxclients 50000
+  #     - --timeout 0
+  #     - --tcp-keepalive 300
+  #     - --client-output-buffer-limit pubsub 256mb 64mb 60
+  #     - --loglevel notice
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
-    command:
-      - redis-server
-      - --maxmemory 128mb
-      - --maxmemory-policy allkeys-lru
-      - --save ""
-      - --appendonly no
-      - --maxclients 50000
-      - --timeout 0
-      - --tcp-keepalive 300
-      - --client-output-buffer-limit pubsub 256mb 64mb 60
-      - --loglevel notice
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
 
   redis-insight:
     image: redis/redisinsight:latest
     ports:
       - "5540:5540" 
     depends_on:
-      - pubsub-redis
+      - redis
 
 volumes:
   pgdata:
