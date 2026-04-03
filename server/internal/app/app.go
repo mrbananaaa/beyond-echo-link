@@ -14,10 +14,12 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/infra/http/handlers"
 	authHandler "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/auth"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
+	redisinfra "github.com/mrbananaaa/bel-server/internal/infra/redis"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
 	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 	"github.com/mrbananaaa/bel-server/internal/validation"
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
@@ -25,6 +27,7 @@ type App struct {
 	Log    *slog.Logger
 	server *apphttp.Server
 	dbpool *pgxpool.Pool
+	rdb    *redisinfra.Redis
 }
 
 func New() (*App, error) {
@@ -43,8 +46,16 @@ func New() (*App, error) {
 		log.Error("cannot connect to db", "error", err.Error())
 		return nil, err
 	}
-
 	log.Info("connected to database")
+
+	client := redis.NewClient(&redis.Options{
+		Addr: cfg.Redis.Address,
+	})
+	rdb := redisinfra.New(
+		client,
+		"dev",
+		2*time.Second,
+	)
 
 	txManager := db.NewTxManager(dbpool)
 
@@ -87,6 +98,7 @@ func New() (*App, error) {
 		Log:    log,
 		server: server,
 		dbpool: dbpool,
+		rdb:    rdb,
 	}, nil
 }
 
@@ -101,6 +113,15 @@ func (a *App) Start() error {
 func (a *App) Shutdown(ctx context.Context) error {
 	// INFO: cleaning the app here...
 	a.dbpool.Close()
+
+	if err := a.rdb.Close(); err != nil {
+		logger.ErrorEvent(a.Log,
+			"rdb_closing_failed",
+			"failed to close redis client",
+			err,
+		)
+		return err
+	}
 
 	return a.server.Shutdown(ctx)
 }
