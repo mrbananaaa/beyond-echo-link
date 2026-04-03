@@ -20,7 +20,7 @@ func MapError(err error) error {
 			return apperror.Invalid("missing required field", pgErr.ColumnName, err)
 
 		default:
-			return apperror.Internal(err)
+			return apperror.Internal(apperror.TypeDB, err)
 		}
 	}
 

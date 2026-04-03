@@ -90,7 +90,7 @@ func Invalid(msg, field string, err error) *AppEror {
 	)
 }
 
-func Internal(err error) *AppEror {
+func Internal(t Type, err error) *AppEror {
 	return New(
 		TypeDB,
 		CodeInternal,
