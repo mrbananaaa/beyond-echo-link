@@ -22,7 +22,7 @@ type AuthService struct {
 	txManager *db.TxManager
 	userRepo  *user.UserRepository
 	log       *slog.Logger
-	jwtSecret string
+	jwtSecret []byte
 	jwtIss    string
 	jwtTtl    time.Duration
 }
@@ -39,7 +39,7 @@ func NewAuthService(
 		txManager: txManager,
 		userRepo:  userRepo,
 		log:       log.With("domain", "auth"),
-		jwtSecret: jwtSecret,
+		jwtSecret: []byte(jwtSecret),
 		jwtIss:    jwtIss,
 		jwtTtl:    jwtTtl,
 	}
