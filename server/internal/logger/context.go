@@ -3,6 +3,8 @@ package logger
 import (
 	"context"
 	"log/slog"
+
+	"github.com/mrbananaaa/bel-server/internal/http/httpx"
 )
 
 type ctxKey struct{}
@@ -22,13 +24,11 @@ func FromContext(ctx context.Context) *slog.Logger {
 	return slog.Default()
 }
 
-type userKey struct{}
-
 func WithUserID(ctx context.Context, userID string) context.Context {
-	return context.WithValue(ctx, userKey{}, userID)
+	return context.WithValue(ctx, httpx.UserIDKey{}, userID)
 }
 
 func UserIDFromContext(ctx context.Context) (string, bool) {
-	id, ok := ctx.Value(userKey{}).(string)
+	id, ok := ctx.Value(httpx.UserIDKey{}).(string)
 	return id, ok
 }
