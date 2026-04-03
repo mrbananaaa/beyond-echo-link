@@ -22,17 +22,26 @@ type AuthService struct {
 	txManager *db.TxManager
 	userRepo  *user.UserRepository
 	log       *slog.Logger
+	jwtSecret string
+	jwtIss    string
+	jwtTtl    time.Duration
 }
 
 func NewAuthService(
 	txManager *db.TxManager,
 	userRepo *user.UserRepository,
 	log *slog.Logger,
+	jwtSecret string,
+	jwtIss string,
+	jwtTtl time.Duration,
 ) *AuthService {
 	return &AuthService{
 		txManager: txManager,
 		userRepo:  userRepo,
 		log:       log.With("domain", "auth"),
+		jwtSecret: jwtSecret,
+		jwtIss:    jwtIss,
+		jwtTtl:    jwtTtl,
 	}
 }
 
@@ -90,7 +99,6 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 	}, nil
 }
 
-// TODO: Login service
 func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput, error) {
 	l := s.getLogger(ctx)
 
@@ -128,13 +136,6 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// TODO: refactor this later using env variable
-var (
-	secretKey = []byte("thisisthejwtsupersecret")
-	iss       = "bel-backend-dev"
-	ttl       = 15 * time.Minute
-)
-
 func (s *AuthService) GenerateAccessToken(userID uuid.UUID) (string, error) {
 	now := time.Now()
 	uid := userID.String()
@@ -142,16 +143,16 @@ func (s *AuthService) GenerateAccessToken(userID uuid.UUID) (string, error) {
 	claims := Claims{
 		UserID: uid,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    iss,
+			Issuer:    s.jwtIss,
 			Subject:   uid,
 			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(s.jwtTtl)),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(secretKey)
+	return token.SignedString(s.jwtSecret)
 }
 
 func (s *AuthService) ValidateToken(tokenStr string) (string, error) {
@@ -159,7 +160,7 @@ func (s *AuthService) ValidateToken(tokenStr string) (string, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", errors.New("failed to parse token"))
 		}
-		return secretKey, nil
+		return s.jwtSecret, nil
 	})
 	if err != nil {
 		return "", apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", fmt.Errorf("failed to parse token: %w", err))

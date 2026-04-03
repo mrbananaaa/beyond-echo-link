@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mrbananaaa/bel-server/internal/infra/config"
@@ -49,7 +50,14 @@ func New() (*App, error) {
 
 	userRepo := user.NewUserRepository(dbpool)
 
-	authService := auth.NewAuthService(txManager, userRepo, log)
+	authService := auth.NewAuthService(
+		txManager,
+		userRepo,
+		log,
+		cfg.Server.JwtSecret,
+		"bel-backend-dev",
+		15*time.Minute,
+	)
 
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
