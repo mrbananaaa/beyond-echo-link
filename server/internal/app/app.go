@@ -56,6 +56,14 @@ func New() (*App, error) {
 		"dev",
 		2*time.Second,
 	)
+	if err := rdb.Ping(context.Background()); err != nil {
+		logger.ErrorEvent(log,
+			"rdb_ping_failed",
+			"failed to ping redis client",
+			err,
+		)
+		return nil, err
+	}
 
 	txManager := db.NewTxManager(dbpool)
 
