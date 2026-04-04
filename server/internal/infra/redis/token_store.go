@@ -9,6 +9,7 @@ type TokenStore interface {
 	SetRefreshToken(ctx context.Context, token string, userID string, ttl time.Duration) error
 	GetUserIDByToken(ctx context.Context, token string) (string, bool, error)
 	DeleteRefreshToken(ctx context.Context, token string) error
+	RotateRefreshToken(ctx context.Context, oldToken string, newToken string, userID string, ttl time.Duration) error
 }
 
 type RedisTokenStore struct {
