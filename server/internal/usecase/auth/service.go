@@ -2,12 +2,9 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mrbananaaa/bel-server/internal/apperror"
@@ -21,26 +18,17 @@ type AuthService struct {
 	txManager *db.TxManager
 	userRepo  *user.UserRepository
 	log       *slog.Logger
-	jwtSecret []byte
-	jwtIss    string
-	jwtTtl    time.Duration
 }
 
 func NewAuthService(
 	txManager *db.TxManager,
 	userRepo *user.UserRepository,
 	log *slog.Logger,
-	jwtSecret string,
-	jwtIss string,
-	jwtTtl time.Duration,
 ) *AuthService {
 	return &AuthService{
 		txManager: txManager,
 		userRepo:  userRepo,
 		log:       log.With("domain", "auth"),
-		jwtSecret: []byte(jwtSecret),
-		jwtIss:    jwtIss,
-		jwtTtl:    jwtTtl,
 	}
 }
 
@@ -133,49 +121,6 @@ func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput
 	return &LoginOutput{
 		ID: user.ID,
 	}, nil
-}
-
-type Claims struct {
-	UserID string `json:"user_id"`
-	jwt.RegisteredClaims
-}
-
-func (s *AuthService) GenerateAccessToken(userID uuid.UUID) (string, error) {
-	now := time.Now()
-	uid := userID.String()
-
-	claims := Claims{
-		UserID: uid,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    s.jwtIss,
-			Subject:   uid,
-			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(s.jwtTtl)),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return token.SignedString(s.jwtSecret)
-}
-
-func (s *AuthService) ValidateToken(tokenStr string) (string, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", errors.New("failed to parse token"))
-		}
-		return s.jwtSecret, nil
-	})
-	if err != nil {
-		return "", apperror.InvalidCredentials(apperror.TypeBusiness, "invalid token", fmt.Errorf("failed to parse token: %w", err))
-	}
-
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return "", apperror.InvalidCredentials(apperror.TypeBusiness, "invalid/expired token", err)
-	}
-
-	return claims.UserID, nil
 }
 
 func (s *AuthService) getLogger(ctx context.Context) *slog.Logger {

@@ -17,6 +17,7 @@ import (
 	redisinfra "github.com/mrbananaaa/bel-server/internal/infra/redis"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
+	"github.com/mrbananaaa/bel-server/internal/usecase/token"
 	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 	"github.com/redis/go-redis/v9"
@@ -67,6 +68,8 @@ func New() (*App, error) {
 		return nil, err
 	}
 
+	tokenStore := redisinfra.NewTokenStore(rdb)
+
 	txManager := db.NewTxManager(dbpool)
 
 	userRepo := user.NewUserRepository(dbpool)
@@ -75,6 +78,9 @@ func New() (*App, error) {
 		txManager,
 		userRepo,
 		log,
+	)
+	tokenService := token.NewTokenService(
+		tokenStore,
 		cfg.Server.JwtSecret,
 		"bel-backend-dev",
 		15*time.Minute,
@@ -82,10 +88,10 @@ func New() (*App, error) {
 
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
-	authHandler := authHandler.NewAuthHandler(validator, authService)
+	authHandler := authHandler.NewAuthHandler(validator, authService, tokenService)
 
 	logMiddleware := middlewares.NewLogMiddleware(log)
-	authMiddleware := middlewares.NewAuthMiddleware(authService, log)
+	authMiddleware := middlewares.NewAuthMiddleware(tokenService, log)
 
 	router := apphttp.NewRouter(
 		apphttp.Handlers{

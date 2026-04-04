@@ -8,21 +8,25 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
+	"github.com/mrbananaaa/bel-server/internal/usecase/token"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 )
 
 type AuthHandler struct {
-	validator   *validation.Validator
-	authService *auth.AuthService
+	validator    *validation.Validator
+	authService  *auth.AuthService
+	tokenService *token.TokenService
 }
 
 func NewAuthHandler(
 	validator *validation.Validator,
 	authService *auth.AuthService,
+	tokenService *token.TokenService,
 ) *AuthHandler {
 	return &AuthHandler{
-		validator:   validator,
-		authService: authService,
+		validator:    validator,
+		authService:  authService,
+		tokenService: tokenService,
 	}
 }
 
@@ -52,7 +56,8 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: refresh token
 
-	accessToken, err := h.authService.GenerateAccessToken(user.ID)
+	// accessToken, err := h.authService.GenerateAccessToken(user.ID)
+	accessToken, err := h.tokenService.GenerateJWT(user.ID.String())
 	if err != nil {
 		response.Error(w, r, err)
 		return
@@ -88,7 +93,7 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.authService.GenerateAccessToken(user.ID)
+	accessToken, err := h.tokenService.GenerateJWT(user.ID.String())
 	if err != nil {
 		response.Error(w, r, err)
 		return

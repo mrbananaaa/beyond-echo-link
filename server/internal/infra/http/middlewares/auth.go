@@ -10,21 +10,21 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
+	"github.com/mrbananaaa/bel-server/internal/usecase/token"
 )
 
 type AuthMiddleware struct {
-	authService *auth.AuthService
-	log         *slog.Logger
+	tokenService *token.TokenService
+	log          *slog.Logger
 }
 
 func NewAuthMiddleware(
-	authService *auth.AuthService,
+	tokenService *token.TokenService,
 	log *slog.Logger,
 ) *AuthMiddleware {
 	return &AuthMiddleware{
-		authService: authService,
-		log:         log,
+		tokenService: tokenService,
+		log:          log,
 	}
 }
 
@@ -54,7 +54,7 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			return
 		}
 
-		userID, err := m.authService.ValidateToken(authHeaderValues[1])
+		userID, err := m.tokenService.ValidateJWT(authHeaderValues[1])
 		if err != nil {
 			logger.ErrorEvent(m.log,
 				"token_validation_failed",
