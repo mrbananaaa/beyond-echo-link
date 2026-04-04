@@ -92,7 +92,7 @@ func Invalid(msg, field string, err error) *AppEror {
 
 func Internal(t Type, err error) *AppEror {
 	return New(
-		TypeDB,
+		t,
 		CodeInternal,
 		"internal server error",
 		http.StatusInternalServerError,
