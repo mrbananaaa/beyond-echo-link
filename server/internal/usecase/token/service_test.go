@@ -41,7 +41,7 @@ func TestTokenService_GenerateRefreshToken(t *testing.T) {
 				15*time.Minute,
 			)
 
-			refreshToken, err := service.GenerateRefreshToken()
+			refreshToken, err := service.GenerateRefreshToken(t.Context(), "asdasd")
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, refreshToken)
