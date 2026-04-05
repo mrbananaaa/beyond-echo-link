@@ -9,24 +9,31 @@ import (
 	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (queries.User, error)
+	GetUserByLookupID(ctx context.Context, lookupID string) (queries.User, error)
+	GetUserByUsername(ctx context.Context, username string) (queries.User, error)
+}
+
+type postgresUserRepository struct {
 	pool *pgxpool.Pool
 }
 
-func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
-	return &UserRepository{
+func NewUserRepository(pool *pgxpool.Pool) UserRepository {
+	return &postgresUserRepository{
 		pool: pool,
 	}
 }
 
-func (r *UserRepository) getQueries(ctx context.Context) *queries.Queries {
+func (r *postgresUserRepository) getQueries(ctx context.Context) *queries.Queries {
 	if tx, ok := db.ExtractTx(ctx); ok {
 		return queries.New(tx)
 	}
 	return queries.New(r.pool)
 }
 
-func (r *UserRepository) CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error) {
+func (r *postgresUserRepository) CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error) {
 	q := r.getQueries(ctx)
 
 	u, err := q.CreateUser(ctx, params)
@@ -37,7 +44,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, params queries.CreateUs
 	return u, nil
 }
 
-func (r *UserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (queries.User, error) {
+func (r *postgresUserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (queries.User, error) {
 	q := r.getQueries(ctx)
 
 	u, err := q.GetUserByID(ctx, userID)
@@ -48,7 +55,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (que
 	return u, nil
 }
 
-func (r *UserRepository) GetUserByLookupID(ctx context.Context, lookupID string) (queries.User, error) {
+func (r *postgresUserRepository) GetUserByLookupID(ctx context.Context, lookupID string) (queries.User, error) {
 	q := r.getQueries(ctx)
 
 	u, err := q.GetUserByLookupID(ctx, lookupID)
@@ -59,7 +66,7 @@ func (r *UserRepository) GetUserByLookupID(ctx context.Context, lookupID string)
 	return u, nil
 }
 
-func (r *UserRepository) GetUserByUsername(ctx context.Context, username string) (queries.User, error) {
+func (r *postgresUserRepository) GetUserByUsername(ctx context.Context, username string) (queries.User, error) {
 	q := r.getQueries(ctx)
 
 	u, err := q.GetUserByUsername(ctx, username)

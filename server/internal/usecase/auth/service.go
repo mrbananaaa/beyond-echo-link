@@ -16,13 +16,13 @@ import (
 
 type AuthService struct {
 	txManager *db.TxManager
-	userRepo  *user.UserRepository
+	userRepo  user.UserRepository
 	log       *slog.Logger
 }
 
 func NewAuthService(
 	txManager *db.TxManager,
-	userRepo *user.UserRepository,
+	userRepo user.UserRepository,
 	log *slog.Logger,
 ) *AuthService {
 	return &AuthService{
