@@ -7,22 +7,22 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
-type UserIDKey struct{}
+type LogUserIDKey struct{}
 
-type UserIDContext struct {
+type LogUserIDCtx struct {
 	UserID string
 }
 
-func UserIDFromContext(ctx context.Context) string {
-	if userIDContext, ok := ctx.Value(UserIDKey{}).(*UserIDContext); ok {
+func LogUserIDFromCtx(ctx context.Context) string {
+	if userIDContext, ok := ctx.Value(LogUserIDKey{}).(*LogUserIDCtx); ok {
 		return userIDContext.UserID
 	}
 
 	return ""
 }
 
-func SetUserIDContext(ctx context.Context, userID string) error {
-	if userIDContext, ok := ctx.Value(UserIDKey{}).(*UserIDContext); ok {
+func SetLogUserIDCtx(ctx context.Context, userID string) error {
+	if userIDContext, ok := ctx.Value(LogUserIDKey{}).(*LogUserIDCtx); ok {
 		userIDContext.UserID = userID
 		return nil
 	}

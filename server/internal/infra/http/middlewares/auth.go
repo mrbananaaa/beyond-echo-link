@@ -65,7 +65,7 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			return
 		}
 
-		if err := httpx.SetUserIDContext(r.Context(), userID); err != nil {
+		if err := httpx.SetLogUserIDCtx(r.Context(), userID); err != nil {
 			logger.ErrorEvent(m.log,
 				"token_validation_failed",
 				"couldn't set userID context value",

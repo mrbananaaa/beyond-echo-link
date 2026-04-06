@@ -44,7 +44,7 @@ func (m *LogMiddleware) Logger(next http.Handler) http.Handler {
 		}
 
 		// UserID for logging
-		userIDCtx := &httpx.UserIDContext{UserID: ""}
+		userIDCtx := &httpx.LogUserIDCtx{UserID: ""}
 
 		// keep track status
 		rw := &responseWriter{
@@ -58,7 +58,7 @@ func (m *LogMiddleware) Logger(next http.Handler) http.Handler {
 			"path", r.URL.Path,
 		)
 
-		ctx := context.WithValue(r.Context(), httpx.UserIDKey{}, userIDCtx)
+		ctx := context.WithValue(r.Context(), httpx.LogUserIDKey{}, userIDCtx)
 		ctx = logger.WithContext(ctx, l)
 
 		next.ServeHTTP(rw, r.WithContext(ctx))

@@ -25,10 +25,10 @@ func FromContext(ctx context.Context) *slog.Logger {
 }
 
 func WithUserID(ctx context.Context, userID string) context.Context {
-	return context.WithValue(ctx, httpx.UserIDKey{}, userID)
+	return context.WithValue(ctx, httpx.LogUserIDKey{}, userID)
 }
 
 func UserIDFromContext(ctx context.Context) (string, bool) {
-	id, ok := ctx.Value(httpx.UserIDKey{}).(string)
+	id, ok := ctx.Value(httpx.LogUserIDKey{}).(string)
 	return id, ok
 }
