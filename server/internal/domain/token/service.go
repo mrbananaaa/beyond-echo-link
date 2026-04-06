@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 	"github.com/mrbananaaa/bel-server/internal/infra/redis"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 )

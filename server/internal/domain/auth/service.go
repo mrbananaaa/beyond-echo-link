@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 	"github.com/mrbananaaa/bel-server/internal/domain/user"
 	"github.com/mrbananaaa/bel-server/internal/infra/db"
 	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"

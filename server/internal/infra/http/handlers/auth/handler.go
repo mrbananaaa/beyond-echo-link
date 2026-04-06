@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 	"github.com/mrbananaaa/bel-server/internal/domain/auth"
 	"github.com/mrbananaaa/bel-server/internal/domain/token"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
@@ -40,7 +40,11 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.ErrorParseJSON(l, err)
-		response.Error(w, r, apperror.ErrBadRequest)
+		response.Error(w, r, apperror.BadRequest(
+			apperror.TypeInfrastructure,
+			"invalid request body",
+			err,
+		))
 		return
 	}
 
@@ -84,7 +88,11 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.ErrorParseJSON(l, err)
-		response.Error(w, r, apperror.ErrBadRequest)
+		response.Error(w, r, apperror.BadRequest(
+			apperror.TypeInfrastructure,
+			"invalid request body",
+			err,
+		))
 		return
 	}
 

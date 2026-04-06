@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
 type UserIDKey struct{}

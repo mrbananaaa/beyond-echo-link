@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 	"github.com/mrbananaaa/bel-server/internal/domain/token"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/Marlliton/slogpretty"
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
 type Config struct {
@@ -72,7 +72,7 @@ func ErrorEvent(l *slog.Logger, event string, msg string, err error, args ...any
 }
 
 func DebugError(l *slog.Logger, msg string, err error) {
-	if appErr, ok := errors.AsType[*apperror.AppEror](err); ok {
+	if appErr, ok := errors.AsType[*apperror.AppError](err); ok {
 		l.Debug(
 			msg,
 			"type", appErr.Type,

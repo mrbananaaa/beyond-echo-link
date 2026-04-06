@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
 type ErrResponse struct {
@@ -14,12 +14,12 @@ type ErrResponse struct {
 }
 
 func Error(w http.ResponseWriter, r *http.Request, err error) {
-	var appErr *apperror.AppEror
+	var appErr *apperror.AppError
 	resp := ErrResponse{}
 
 	if errors.As(err, &appErr) {
 
-		resp.Error = appErr.Code
+		resp.Error = string(appErr.Code)
 		resp.Message = appErr.Message
 
 		if len(appErr.Details) > 0 {
@@ -30,7 +30,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 		return
 	}
 
-	resp.Error = apperror.CodeInternal
+	resp.Error = string(apperror.CodeInternal)
 	resp.Message = "internal server error"
 
 	JSON(w, http.StatusInternalServerError, resp)

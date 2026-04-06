@@ -2,10 +2,9 @@ package validation
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
 type Validator struct {
@@ -30,11 +29,7 @@ func (v *Validator) Validate(i any) error {
 		errors = append(errors, formatError(err))
 	}
 
-	return apperror.New(
-		apperror.TypeInfrastructure,
-		apperror.CodeBadRequest,
-		"validation error",
-		http.StatusBadRequest,
+	return apperror.Validation(
 		err,
 		errors...,
 	)
