@@ -95,6 +95,8 @@ func (m *AuthMiddleware) VerifyRefreshToken(next http.Handler) http.Handler {
 			return
 		}
 
+		// TODO: USERIDCONTEXT
+
 		logger.InfoEvent(l,
 			"refresh_token_middleware",
 			"refresh token middleware",
