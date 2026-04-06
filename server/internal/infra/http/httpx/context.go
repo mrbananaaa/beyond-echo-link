@@ -7,6 +7,17 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 )
 
+type UserIDKey struct{}
+
+func UserIDFromCtx(ctx context.Context) (string, bool) {
+	userID, ok := ctx.Value(UserIDKey{}).(string)
+	return userID, ok
+}
+
+func SetUserIDCtx(ctx context.Context, userID string) context.Context {
+	return context.WithValue(ctx, UserIDKey{}, userID)
+}
+
 type LogUserIDKey struct{}
 
 type LogUserIDCtx struct {
