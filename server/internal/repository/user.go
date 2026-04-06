@@ -60,7 +60,7 @@ func (r *postgresUserRepository) GetByID(ctx context.Context, userID uuid.UUID) 
 	if err != nil {
 		return nil, db.MapError(err)
 	}
-	var user *user.User
+	user := &user.User{}
 	user.FromDB(u)
 
 	return user, nil
@@ -73,7 +73,7 @@ func (r *postgresUserRepository) GetByLookupID(ctx context.Context, lookupID str
 	if err != nil {
 		return nil, db.MapError(err)
 	}
-	var user *user.User
+	user := &user.User{}
 	user.FromDB(u)
 
 	return user, nil
@@ -86,7 +86,7 @@ func (r *postgresUserRepository) GetByUsername(ctx context.Context, username str
 	if err != nil {
 		return nil, db.MapError(err)
 	}
-	var user *user.User
+	user := &user.User{}
 	user.FromDB(u)
 
 	return user, nil
