@@ -6,11 +6,9 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mrbananaaa/bel-server/internal/domain/apperror"
 	"github.com/mrbananaaa/bel-server/internal/domain/user"
 	"github.com/mrbananaaa/bel-server/internal/infra/db"
-	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 )
 
@@ -45,18 +43,14 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 		return nil, apperror.Internal(apperror.TypeBusiness, fmt.Errorf("couldn't generate lookupID: %w", err))
 	}
 
-	user, err := s.userRepo.CreateUser(ctx, queries.CreateUserParams{
-		ID:       uuid.New(),
-		Email:    input.Email,
-		Username: input.Username,
-		Password: passwordHash,
-		LookupID: lookupID,
-		Bio: pgtype.Text{
-			String: input.Bio,
-		},
-		ProfilePicture: pgtype.Text{
-			String: input.ProfilePicture,
-		},
+	user, err := s.userRepo.Save(ctx, &user.User{
+		ID:             uuid.New(),
+		Email:          input.Email,
+		Username:       input.Username,
+		Password:       passwordHash,
+		LookupID:       lookupID,
+		Bio:            input.Bio,
+		ProfilePicture: input.ProfilePicture,
 	})
 	if err != nil {
 		logger.ErrorEvent(l,
@@ -78,8 +72,8 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 		Email:          user.Email,
 		Username:       user.Username,
 		LookupID:       user.LookupID,
-		Bio:            user.Bio.String,
-		ProfilePicture: user.ProfilePicture.String,
+		Bio:            user.Bio,
+		ProfilePicture: user.ProfilePicture,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
 	}, nil
@@ -88,7 +82,7 @@ func (s *AuthService) RegisterUser(ctx context.Context, input RegisterUserInput)
 func (s *AuthService) Login(ctx context.Context, input LoginInput) (*LoginOutput, error) {
 	l := s.getLogger(ctx)
 
-	user, err := s.userRepo.GetUserByUsername(ctx, input.Username)
+	user, err := s.userRepo.GetByUsername(ctx, input.Username)
 	if err != nil {
 		logger.ErrorEvent(l,
 			"user_login_failed",

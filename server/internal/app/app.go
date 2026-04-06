@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mrbananaaa/bel-server/internal/domain/auth"
 	"github.com/mrbananaaa/bel-server/internal/domain/token"
-	"github.com/mrbananaaa/bel-server/internal/domain/user"
 	"github.com/mrbananaaa/bel-server/internal/infra/config"
 	"github.com/mrbananaaa/bel-server/internal/infra/db"
 	apphttp "github.com/mrbananaaa/bel-server/internal/infra/http"
@@ -20,6 +19,7 @@ import (
 	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
 	redisinfra "github.com/mrbananaaa/bel-server/internal/infra/redis"
 	"github.com/mrbananaaa/bel-server/internal/logger"
+	"github.com/mrbananaaa/bel-server/internal/repository"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 	"github.com/redis/go-redis/v9"
 )
@@ -73,7 +73,7 @@ func New() (*App, error) {
 
 	txManager := db.NewTxManager(dbpool)
 
-	userRepo := user.NewUserRepository(dbpool)
+	userRepo := repository.NewUserRepository(dbpool)
 
 	authService := auth.NewAuthService(
 		txManager,
