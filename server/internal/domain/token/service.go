@@ -160,9 +160,10 @@ func (s *TokenService) GetUserIDFromRefreshToken(ctx context.Context, token stri
 	}
 
 	if !exists {
-		err := apperror.Internal(
+		err := apperror.InvalidCredentials(
 			apperror.TypeBusiness,
-			fmt.Errorf("token not exists"),
+			"invalid token",
+			fmt.Errorf("couldn't find userID from token in redis"),
 		)
 		logger.ErrorEvent(l,
 			"refreshtoken_find_failed",
