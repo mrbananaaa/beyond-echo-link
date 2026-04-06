@@ -65,6 +65,7 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			return
 		}
 
+		// INFO: set userID for logger
 		if err := httpx.SetLogUserIDCtx(r.Context(), userID); err != nil {
 			logger.ErrorEvent(m.log,
 				"token_validation_failed",
@@ -74,7 +75,9 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := httpx.SetUserIDCtx(r.Context(), userID)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -95,14 +98,14 @@ func (m *AuthMiddleware) VerifyRefreshToken(next http.Handler) http.Handler {
 			return
 		}
 
-		// TODO: USERIDCONTEXT
+		userID, err := m.tokenService.GetUserIDFromRefreshToken(r.Context(), refreshToken)
+		if err != nil {
+			response.Error(w, r, err)
+			return
+		}
 
-		logger.InfoEvent(l,
-			"refresh_token_middleware",
-			"refresh token middleware",
-			"refresh_token", refreshToken,
-		)
+		ctx := httpx.SetUserIDCtx(r.Context(), userID)
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
