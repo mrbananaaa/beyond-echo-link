@@ -8,17 +8,18 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mrbananaaa/bel-server/internal/domain/auth"
+	"github.com/mrbananaaa/bel-server/internal/domain/token"
+	"github.com/mrbananaaa/bel-server/internal/domain/user"
 	"github.com/mrbananaaa/bel-server/internal/infra/config"
 	"github.com/mrbananaaa/bel-server/internal/infra/db"
 	apphttp "github.com/mrbananaaa/bel-server/internal/infra/http"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/handlers"
 	authHandler "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/auth"
+	wsHandler "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/ws"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
 	redisinfra "github.com/mrbananaaa/bel-server/internal/infra/redis"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
-	"github.com/mrbananaaa/bel-server/internal/usecase/token"
-	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 	"github.com/redis/go-redis/v9"
 )
@@ -89,6 +90,7 @@ func New() (*App, error) {
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := authHandler.NewAuthHandler(validator, authService, tokenService)
+	wsHandler := wsHandler.NewWsHandler()
 
 	logMiddleware := middlewares.NewLogMiddleware(log)
 	authMiddleware := middlewares.NewAuthMiddleware(tokenService, log)
@@ -97,6 +99,7 @@ func New() (*App, error) {
 		apphttp.Handlers{
 			Health: healthHandler,
 			Auth:   authHandler,
+			Ws:     wsHandler,
 		},
 		apphttp.Middlewares{
 			Log:  logMiddleware,

@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/handlers"
 	auth "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/auth"
+	"github.com/mrbananaaa/bel-server/internal/infra/http/handlers/ws"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 )
@@ -14,6 +15,7 @@ import (
 type Handlers struct {
 	Health *handlers.HealthHandler
 	Auth   *auth.AuthHandler
+	Ws     *ws.WsHandler
 }
 
 type Middlewares struct {
@@ -29,6 +31,12 @@ func NewRouter(h Handlers, m Middlewares) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/auth", h.Auth.Routes())
+
+	r.Group(func(r chi.Router) {
+		r.Use(m.Auth.VerifyRefreshToken)
+
+		r.Mount("/ws", h.Ws.Routes())
+	})
 
 	r.Mount("/health", h.Health.Routes())
 

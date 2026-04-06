@@ -8,10 +8,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/user"
 	"github.com/mrbananaaa/bel-server/internal/infra/db"
 	queries "github.com/mrbananaaa/bel-server/internal/infra/db/sqlc"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/usecase/user"
 )
 
 type AuthService struct {

@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/auth"
+	"github.com/mrbananaaa/bel-server/internal/domain/token"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/usecase/auth"
-	"github.com/mrbananaaa/bel-server/internal/usecase/token"
 	"github.com/mrbananaaa/bel-server/internal/validation"
 )
 

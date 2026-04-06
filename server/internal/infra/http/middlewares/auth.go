@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/mrbananaaa/bel-server/internal/apperror"
+	"github.com/mrbananaaa/bel-server/internal/domain/token"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/httpx"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/response"
 	"github.com/mrbananaaa/bel-server/internal/logger"
-	"github.com/mrbananaaa/bel-server/internal/usecase/token"
 )
 
 type AuthMiddleware struct {
@@ -73,6 +73,33 @@ func (m *AuthMiddleware) VerifyAccessToken(next http.Handler) http.Handler {
 			)
 			return
 		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *AuthMiddleware) VerifyRefreshToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := logger.FromContext(r.Context())
+
+		refreshToken, err := httpx.GetRefreshTokenCookie(r)
+		if err != nil {
+			err := apperror.InvalidCredentials(apperror.TypeInfrastructure, "invalid token", err)
+			logger.ErrorEvent(l,
+				"refreshtoken_validate_failed",
+				"couldn't get refresh token from cookie",
+				err,
+			)
+
+			response.Error(w, r, err)
+			return
+		}
+
+		logger.InfoEvent(l,
+			"refresh_token_middleware",
+			"refresh token middleware",
+			"refresh_token", refreshToken,
+		)
 
 		next.ServeHTTP(w, r)
 	})
