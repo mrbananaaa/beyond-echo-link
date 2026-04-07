@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     env_file:
       - .env
-    volumes: 
+    volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     ports:
@@ -42,7 +42,7 @@ services:
   redis-insight:
     image: redis/redisinsight:latest
     ports:
-      - "5540:5540" 
+      - "5540:5540"
     depends_on:
       - redis
 
