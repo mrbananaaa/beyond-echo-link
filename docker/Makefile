@@ -17,6 +17,10 @@ compose-dev-up-build:
 compose-dev-down:
 	@docker compose -f ${DEV_COMPOSE_FILE} down
 
+.PHONY: compose-dev-drop
+compose-dev-drop:
+	@docker compose -f ${DEV_COMPOSE_FILE} down -v
+
 .PHONY: compose-dev-logs
 compose-dev-logs:
 	@docker compose -f ${DEV_COMPOSE_FILE} logs -f
