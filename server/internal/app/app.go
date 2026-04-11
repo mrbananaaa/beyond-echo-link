@@ -90,7 +90,7 @@ func New() (*App, error) {
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := authHandler.NewAuthHandler(validator, authService, tokenService)
-	wsHandler := wsHandler.NewWsHandler()
+	wsHandler := wsHandler.NewWsHandler(tokenService)
 
 	logMiddleware := middlewares.NewLogMiddleware(log)
 	authMiddleware := middlewares.NewAuthMiddleware(tokenService, log)
