@@ -9,7 +9,7 @@ import (
 
 type UserIDKey struct{}
 
-func UserIDFromCtx(ctx context.Context) (string, bool) {
+func GetUserIDFromCtx(ctx context.Context) (string, bool) {
 	userID, ok := ctx.Value(UserIDKey{}).(string)
 	return userID, ok
 }
