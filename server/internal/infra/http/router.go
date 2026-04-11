@@ -33,7 +33,7 @@ func NewRouter(h Handlers, m Middlewares) *chi.Mux {
 	r.Mount("/auth", h.Auth.Routes())
 
 	r.Group(func(r chi.Router) {
-		r.Use(m.Auth.VerifyRefreshToken)
+		// r.Use(m.Auth.VerifyAccessToken)
 
 		r.Mount("/ws", h.Ws.Routes())
 	})
