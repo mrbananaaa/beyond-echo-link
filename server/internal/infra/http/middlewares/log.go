@@ -15,15 +15,15 @@ type LogMiddleware struct {
 	log *slog.Logger
 }
 
-type responseWriter struct {
-	http.ResponseWriter
-	status int
-}
+// type responseWriter struct {
+// 	http.ResponseWriter
+// 	status int
+// }
 
-func (rw *responseWriter) WriteHeader(code int) {
-	rw.status = code
-	rw.ResponseWriter.WriteHeader(code)
-}
+// func (rw *responseWriter) WriteHeader(code int) {
+// 	rw.status = code
+// 	rw.ResponseWriter.WriteHeader(code)
+// }
 
 func NewLogMiddleware(
 	log *slog.Logger,
@@ -47,10 +47,10 @@ func (m *LogMiddleware) Logger(next http.Handler) http.Handler {
 		userIDCtx := &httpx.LogUserIDCtx{UserID: ""}
 
 		// keep track status
-		rw := &responseWriter{
-			ResponseWriter: w,
-			status:         http.StatusOK,
-		}
+		// rw := &responseWriter{
+		// 	ResponseWriter: w,
+		// 	status:         http.StatusOK,
+		// }
 
 		l := m.log.With(
 			"request_id", reqID,
@@ -61,7 +61,7 @@ func (m *LogMiddleware) Logger(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), httpx.LogUserIDKey{}, userIDCtx)
 		ctx = logger.WithContext(ctx, l)
 
-		next.ServeHTTP(rw, r.WithContext(ctx))
+		next.ServeHTTP(w, r.WithContext(ctx))
 
 		duration := time.Since(start).Milliseconds()
 
@@ -71,7 +71,7 @@ func (m *LogMiddleware) Logger(next http.Handler) http.Handler {
 
 		l.Info("request completed",
 			"event", "http_request_completed",
-			"status", rw.status,
+			// "status", rw.status,
 			"duration_ms", duration,
 		)
 	})
