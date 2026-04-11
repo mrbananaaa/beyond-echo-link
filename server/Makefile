@@ -24,3 +24,15 @@ server-dev: clean watch
 .PHONY: server-windows-dev
 server-windows-dev:
 	@air -c air.windows.toml
+
+.PHONY: migration-up
+migration-up: 
+	@goose up
+
+.PHONY: migration-down
+migration-down: 
+	@goose down
+
+.PHONY: migration-status
+migration-status:
+	@goose status
