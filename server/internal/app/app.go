@@ -18,6 +18,7 @@ import (
 	wsHandler "github.com/mrbananaaa/bel-server/internal/infra/http/handlers/ws"
 	"github.com/mrbananaaa/bel-server/internal/infra/http/middlewares"
 	redisinfra "github.com/mrbananaaa/bel-server/internal/infra/redis"
+	"github.com/mrbananaaa/bel-server/internal/infra/websocket"
 	"github.com/mrbananaaa/bel-server/internal/logger"
 	"github.com/mrbananaaa/bel-server/internal/repository"
 	"github.com/mrbananaaa/bel-server/internal/validation"
@@ -30,6 +31,7 @@ type App struct {
 	server *apphttp.Server
 	dbpool *pgxpool.Pool
 	rdb    *redisinfra.Redis
+	hub    *websocket.Hub
 }
 
 func New() (*App, error) {
@@ -87,10 +89,12 @@ func New() (*App, error) {
 		15*time.Minute,
 	)
 
+	hub := websocket.NewHub()
+
 	validator := validation.New()
 	healthHandler := handlers.NewHealthHandler()
 	authHandler := authHandler.NewAuthHandler(validator, authService, tokenService)
-	wsHandler := wsHandler.NewWsHandler(tokenService)
+	wsHandler := wsHandler.NewWsHandler(hub, tokenService)
 
 	logMiddleware := middlewares.NewLogMiddleware(log)
 	authMiddleware := middlewares.NewAuthMiddleware(tokenService, log)
@@ -118,10 +122,13 @@ func New() (*App, error) {
 		server: server,
 		dbpool: dbpool,
 		rdb:    rdb,
+		hub:    hub,
 	}, nil
 }
 
 func (a *App) Start() error {
+	go a.hub.Run()
+
 	if err := a.server.Start(); err != http.ErrServerClosed {
 		return err
 	}

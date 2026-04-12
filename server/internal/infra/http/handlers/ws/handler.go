@@ -14,13 +14,16 @@ import (
 )
 
 type WsHandler struct {
+	hub          *websocket.Hub
 	tokenService *token.TokenService
 }
 
 func NewWsHandler(
+	hub *websocket.Hub,
 	tokenService *token.TokenService,
 ) *WsHandler {
 	return &WsHandler{
+		hub:          hub,
 		tokenService: tokenService,
 	}
 }
@@ -73,9 +76,13 @@ func (h *WsHandler) Websocket(w http.ResponseWriter, r *http.Request) {
 		Send:  make(chan []byte),
 	}
 
+	h.hub.Register <- client
+
 	logger.InfoEvent(l,
-		"client_created",
-		"success to creating client",
-		"client", fmt.Sprintf("%+v", client),
+		"ws_client_created",
+		"success to creating websocket client",
 	)
+
+	go client.ReadPump(r.Context(), h.hub)
+	client.WritePump(r.Context())
 }
